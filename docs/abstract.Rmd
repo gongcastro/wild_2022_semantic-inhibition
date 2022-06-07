@@ -1,0 +1,53 @@
+---
+title: 'WILD 2022: abstract'
+output:
+    word_document:
+         reference_docx: word_template.docx
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+
+tar_load_all()
+
+attrition <- attrition %>% 
+  mutate(
+    valid_gaze = valid_gaze_prime & valid_gaze_target,
+    valid_status = case_when(
+      !valid_gaze ~ "Invalid gaze",
+      !valid_participant ~ "Invalid participant",
+      TRUE ~ "Valid"
+    ))
+
+participants <- participants %>% 
+  left_join(distinct(attrition, participant, age_group, valid_participant)) %>% 
+  drop_na(participant) %>% 
+  left_join(vocabulary) %>% 
+  mutate(
+    vocab_size_total_center = scale(vocab_size_total)[,1],
+    vocab_size_conceptual_center = scale(vocab_size_conceptual)[,1]
+  )
+
+sample_size <- participants %>% 
+  filter(valid_participant) %>% 
+  count(lp)
+
+```
+
+# The emergence of inhibitory links in the developing lexicon: insights from bilingual participants
+
+The emergence of inhibitory links in the developing lexicon has been reported to occur at around 18 months of age, and to be dependent on toddlers' vocabulary size [@chow2016backward; @chow2019vocabulary]. This finding is compatible with two accounts. One possibility is that inhibitory connections emerge only after the child has acquired a critical amount of word-forms (total vocabulary). Another possibility is that the number of concepts the child has a word for (conceptual vocabulary) plays a more central role. It is currently not possible to determine which hypothesis explains these developmental patterns better: previous studies have relied exclusively on monolingual participants, for whom the two measures of vocabulary size are virtually identical. In this study, we address this issue by testing bilingual toddlers, who frequently know more than one word-form for the same concept (one in each language, e.g., *dog*-*perro*), and therefore might have different total and conceptual vocabularies. We tested monolingual and bilingual toddlers aged 20 to 32 months in an adaptation of @chow2016backward's experimental task. We present preliminary data (data collection is ongoing) from `r sample_size$n[2]` monolinguals and `r sample_size$n[1]` bilinguals suggesting that, in line with previous studies, participant's recognition of an object semantically related to a previously presented object (e.g., *cat*-*dog*) was delayed when an object from a different semantic category (e.g., a *train*) was displayed and named in between, compared to when a neutral checkerboard (and an auditory tone) was presented instead. Interestingly, a model including total vocabulary as predictor fitted the data better than one including conceptual vocabulary. Overall these preliminary results point to total vocabulary (number of acquired word-forms) as playing a more central role in the emergence of inhibitory connections in the developing lexicon.
+
+
+
+```{r epreds_plot, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="Fig. 1. Expected posterior predictions of the model including with total vocabulary, plotted in separate panels for monolinguals and bilinguals, and for participants with low (-1 SD), mean (0 SD), and high (+1 SD) total vocabulary size. Overall, target looking was delayed after the presentation of a word intervening object, compared to a neutral tone."}
+
+include_graphics(here("img", "epreds.png"))
+
+```
+
+
+## References
